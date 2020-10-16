@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js" ></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<style>
+
+.list{
+ float: left;
+}
+.operations{
+float:right;
+margin-right:200px;
+}
+
+.operations2{
+float:right;
+margin-right:100px;
+}
+
+.mn {
+  color: red;
+}
+
+
+</style>
+<meta charset="ISO-8859-1">
+<title>Contact book</title>
+<link rel="shortcut icon" href="#" />
+</head>
+<body>
+<h2>Address Book Operations</h2>
+
+<div class="list">
+<h3>List Of Contacts</h3>
+<ul id="demo"></ul>
+<p id="demo1"></p>
+</div>
+
+
+<div class="operations">
+<div id="first" class="first">
+<h3>Add Contact</h3>
+<div>
+<label for="c_name">Enter Name</label>
+<div>
+<input type="text" name="c_name" onfocus="this.value=''" id="c_name"/>
+</div>
+</div>
+
+<div>
+<label for="c_phn">Enter PhoneNumber</label>
+<div>
+<input type="text" name="c_phn" onfocus="this.value=''" id="c_phn" onkeyup="suggestions(this.value)"/>
+<div class="mn" id="mn"> </div>
+</div>
+</div>
+
+<div>
+<label for="c_email">Enter Email</label>
+<div>
+<input type="text" name="c_email" onfocus="this.value=''" id="c_email"/>
+</div>
+</div>
+<p></p>
+<input type="button" name="postData" id="postData" value="Add" onclick="postDataFromAPI();"/>
+</div>
+
+<div id="second" class="second">
+<h3>Delete Contact</h3>
+<div>
+<label for="delete_name">Enter the name of the contact to be deleted</label>
+<div>
+<input type="text" name="delete_name" onfocus="this.value=''" id="delete_name"/>
+<ul class="list-group" id="result2"></ul>
+</div>
+</div>
+<p></p>
+<input type="button" name="deleteData" id="deleteData" value="Delete" onclick="deleteDataFromAPI();"/>
+</div>
+
+</div>
+
+<div class=operations2>
+
+<div id="third" class="third">
+<h3>Edit Contact</h3>
+<div>
+<label for="c_name1">Enter the name of the contact to be edited</label>
+<div>
+<input type="text" name="c_name1" onfocus="this.value=''" id="c_name1"/>
+</div>
+<ul class="list-group" id="result3"></ul>
+</div>
+
+<div>
+<label for="c_phn1">Enter the new phone number</label>
+<div>
+<input type="text" name="c_phn1" onfocus="this.value=''" id="c_phn1"/>
+</div>
+</div>
+
+<div>
+<label for="c_email1">Enter the new email</label>
+<div>
+<input type="text" name="c_email1" onfocus="this.value=''" id="c_email1"/>
+</div>
+</div>
+<p></p>
+<input type="button" name="editData" id="editData" value="Edit" onclick="editDataFromAPI();"/>
+</div>
+<h3>Search Contact</h3>
+<div>
+<label for="c_name2">Enter the name of the contact to be searched</label>
+<div>
+<input type="text" name="c_name2" onfocus="this.value=''" id="c_name2"/>
+<ul class="list-group" id="result"></ul>
+</div>
+<p></p>
+<input type="button" name="searchData" id="searchData" value="Search" onclick="searchDataFromAPI();"/>
+<p id="display1"></p>
+<p id="display2"></p>
+<p id="display3"></p>
+</div>
+</div>
+
+
+
+
+<script>
+$(document).ready(function(){
+	 $('#c_name2').keyup(function(){
+	  $('#result').html('');
+	  var searchField = $('#c_name2').val();
+	  var expression = new RegExp(searchField, "i");
+	  
+	  $.ajax({
+			url:"/getdata",
+			type:"GET",
+			success:function(demo){
+				
+				$.each(demo,function(i,d){
+					if (d.name.search(expression) != -1)
+				    {
+				     $('#result').append('<li><span>'+d.name+'</span></li>');
+				    }
+				});
+					
+				
+			}
+				});
+	 });
+
+	 $('#result').on('click', 'li', function() {
+	  var click_text = $(this).text().split('|');
+	  var selected=$.trim(click_text[0]);
+	  $('#c_name2').val(selected);
+	  $("#result").html('');  
+	 });
+});
+
+
+
+$(document).ready(function(){
+	 $('#c_name1').keyup(function(){
+	  $('#result3').html('');
+	  var searchField = $('#c_name1').val();
+	  var expression = new RegExp(searchField, "i"); 
+	  $.ajax({
+			url:"/getdata",
+			type:"GET",
+			success:function(demo){
+				
+				$.each(demo,function(i,d){
+					if (d.name.search(expression) != -1)
+				    {
+				     $('#result3').append('<li><span>'+d.name+'</span></li>');
+				    }
+				});}
+				}); });
+
+	 $('#result3').on('click', 'li', function() {
+	  var click_text = $(this).text().split('|');
+	  var selected=$.trim(click_text[0]);
+	  $('#c_name1').val(selected);
+	  $("#result3").html('');  
+	  search(selected);
+	 });
+});
+
+
+
+
+$(document).ready(function(){
+	
+	 $('#delete_name').keyup(function(){
+	  $('#result2').html('');
+	  var searchField = $('#delete_name').val();
+	  var expression = new RegExp(searchField, "i");
+	  
+	  $.ajax({
+			url:"/getdata",
+			type:"GET",
+			success:function(demo){
+				
+				$.each(demo,function(i,d){
+					if (d.name.search(expression) != -1)
+				    {
+				     $('#result2').append('<li><span>'+d.name+'</span></li>');
+				    }
+				});
+					
+				
+			}
+				});
+	 });
+
+	 $('#result2').on('click', 'li', function() {
+	  var click_text = $(this).text().split('|');
+	  $('#delete_name').val($.trim(click_text[0]));
+	  $("#result2").html('');
+	 });
+});
+	
+function suggestions(str)
+{
+	$("#mn").empty();
+	$.ajax({
+		url:"/validatenumber",
+		data:"phonenumber="+str,
+		success: function(result){
+			if(result=="Success"){
+				$("#mn").append("Phone number already exists");	
+				$("#postData").prop("disabled",true);
+			}
+			else
+		    {
+				$("#postData").prop("disabled",false);
+		    }
+		}
+		
+	});
+}
+
+function searchDataFromAPI()
+{
+	var $name=$('#c_name2')	
+	$.ajax({
+		type:"GET",
+		url:"/searchdata"+"/"+$name.val(),
+		success:function(demo){
+		
+			$("#display1").empty();
+			$("#display2").empty();
+			$("#display3").empty();
+			$("#display1").append("Name: "+demo.name);
+			$("#display2").append("PhoneNumber: "+demo.phonenumber);
+			$("#display3").append("Email: "+demo.email);
+		}
+	});
+}
+
+function search(str)
+{
+	$.ajax({
+		type:"GET",
+		url:"/searchdata"+"/"+str,
+		success:function(demo){
+			document.getElementById("c_phn1").value=demo.phonenumber;
+			document.getElementById("c_email1").value=demo.email;
+		}
+	});
+	
+	}
+function getDataFromAPI(){
+	
+	$('#demo').empty();
+
+	var $demo =$('#demo')
+	
+	$.ajax({
+		url:"/getdata",
+		type:"GET",
+		success:function(demo){
+			
+			$.each(demo,function(i,d){
+				$demo.append('<li>Name: '+d.name+', Phonenumber: '+d.phonenumber+' ,Email: '+d.email+'</li>');
+			});		
+		}
+	});
+}
+
+
+function postDataFromAPI(){
+	
+	var $name=$('#c_name');
+	var $phn=$('#c_phn');
+	var $email=$('#c_email');
+	
+	var mod ={
+			name:$name.val(),
+			phonenumber:$phn.val(),
+			email:$email.val()
+			};
+	
+	$.ajax({
+		type:"POST",
+		url:"/postdata",
+		headers:{
+			"Content-Type":"application/json",
+			"Accept": "application/json"
+		},
+		data:JSON.stringify(mod),
+		dataType:'text',
+		success:function(){
+			alert("Added Successfully");
+			getDataFromAPI();
+		}
+		
+	});
+	
+}
+
+
+function deleteDataFromAPI(){
+	var $name=$('#delete_name');
+	
+    
+	$.ajax({
+		type:"DELETE",
+		url:"/deletedata"+"/"+$name.val(),
+		success:function(){
+			alert("Deleted Successfully");
+			getDataFromAPI();
+		}
+	});
+}
+
+function editDataFromAPI(){
+	var $name=$('#c_name1');
+	var $phn=$('#c_phn1');
+	var $email=$('#c_email1');	
+	var mod ={
+			name:$name.val(),
+			phonenumber:$phn.val(),
+			email:$email.val()};
+	
+	$.ajax({
+		type:"POST",
+		url:"/editdata",
+		headers:{
+			"Content-Type":"application/json",
+			"Accept": "application/json"
+		},
+		dataType:'text',
+		data:JSON.stringify(mod),
+		success:function(){
+			alert("Edited Successfully");
+			getDataFromAPI();
+		}
+		
+	});
+}
+
+
+</script>
+</body>
+</html>
